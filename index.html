@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de CEP</title>
+</head>
+<body>
+    <h1>Consulta de CEP</h1>
+    <div>
+        <label for="cepInput">CEP:</label>
+        <input type="text" id="cepInput" placeholder="Digite o CEP">
+        <button onclick="consultarCEP()">Consultar</button>
+    </div>
+    <div id="apiData"></div>
+
+    <script>
+        // Função para consultar o CEP
+        function consultarCEP() {
+            var cep = document.getElementById('cepInput').value;
+
+            // Verifica se o campo CEP está vazio
+            if (cep.trim() === '') {
+                alert('Por favor, digite um CEP válido.');
+                return;
+            }
+
+            // URL da API que retorna dados com base no CEP
+            var apiUrl = 'https://viacep.com.br/ws/' + cep + '/json/';
+
+            // Fazendo uma solicitação GET usando XMLHttpRequest
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', apiUrl, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // Manipulando os dados retornados
+                    var data = JSON.parse(xhr.responseText);
+                    exibirDadosCEP(data);
+                } else {
+                    console.error('Erro ao consultar o CEP:', xhr.statusText);
+                }
+            };
+            xhr.onerror = function () {
+                console.error('Erro de rede ao consultar o CEP.');
+            };
+            xhr.send();
+        }
+
+        // Função para exibir os dados do CEP na página HTML
+        function exibirDadosCEP(data) {
+            var apiDataElement = document.getElementById('apiData');
+            // Limpa o conteúdo anterior
+            apiDataElement.innerHTML = '';
+
+            // Verifica se o CEP é válido
+            if (data.erro) {
+                apiDataElement.textContent = 'CEP não encontrado.';
+            } else {
+                // Cria elementos HTML para exibir os dados do CEP
+                var ul = document.createElement('ul');
+                var campos = ['logradouro', 'bairro', 'localidade', 'uf'];
+                campos.forEach(function (campo) {
+                    var li = document.createElement('li');
+                    li.textContent = capitalizarPrimeiraLetra(campo) + ': ' + data[campo];
+                    ul.appendChild(li);
+                });
+                apiDataElement.appendChild(ul);
+            }
+        }
+
+        // Função para capitalizar a primeira letra de uma string
+        function capitalizarPrimeiraLetra(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+    </script>
+</body>
+</html>
